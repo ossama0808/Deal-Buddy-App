@@ -32,10 +32,11 @@ class _SplashScreenState extends State<SplashScreen> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
+            SizedBox(height: 15,),
             Padding(
               padding: EdgeInsets.all(8.0),
               child: Container(
-                height: 275,
+                height: 250,
                 decoration: BoxDecoration(image: DecorationImage(image: AssetImage('assets/Logo1.png'))),
               ),
             ),

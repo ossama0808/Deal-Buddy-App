@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "967383497988",
+    "project_id": "deal-buddy-app",
+    "storage_bucket": "deal-buddy-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:967383497988:android:26d70f2bf482ab63b8e451",
+        "android_client_info": {
+          "package_name": "com.example.deal_buddy_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA4e6PwClGXo6yFMc4pMDVXIW0TuN7t_k0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

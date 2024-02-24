@@ -1,6 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'SignUpPage.dart';
+
 
 class LoginPage extends StatefulWidget {
   @override
@@ -24,8 +28,9 @@ class _LoginPageState extends State<LoginPage> {
           child: SingleChildScrollView(
             child: Column(
               children: [
+                SizedBox(height: 15,),
                 Container(
-                  height: 275,
+                  height: 225,
                   decoration: BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/Logo1.png'),
@@ -109,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                   onPressed: () {
-                    // Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => SignUpPage()));
+                    Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => SignUpPage()));
                   },
                 ),
                 Padding(
@@ -129,6 +134,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     onTap: () {
+                      initiateLoginProcess();
                     },
                   ),
                 ),
@@ -136,5 +142,42 @@ class _LoginPageState extends State<LoginPage> {
             ),
           )),
     );
+  }
+
+  initiateLoginProcess() async {
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+          email: emailController.text.toString(),
+          password: passwordController.text.toString()
+      ).then((value) async {
+        final user = value.user;
+        if (user != null) {
+          await FirebaseFirestore.instance.collection('Accounts').doc(user.uid).get().then((userData) async {
+            if (userData.data()?['IsActive'] == false) {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                duration: Duration(seconds: 4),
+                backgroundColor: Colors.red,
+                content: Center(child: Text('Your account is not active, please contact the administrator',style: GoogleFonts.elMessiri(color: Colors.white,fontSize: 19))),
+              ));
+            } else {
+              print('Account passed');
+              // Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => Dashboard(userData: userData)));
+            }
+          });
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            duration: Duration(seconds: 3),
+            backgroundColor: Colors.red,
+            content: Center(child: Text('An error occur while login you',style: GoogleFonts.elMessiri(color: Colors.white,fontSize: 19,))),
+          ));
+        }
+      });
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        duration: Duration(seconds: 3),
+        backgroundColor: Colors.red,
+        content: Center(child: Text('Invalid email or password',style: GoogleFonts.elMessiri(color: Colors.white,fontSize: 19,))),
+      ));
+    }
   }
 }
