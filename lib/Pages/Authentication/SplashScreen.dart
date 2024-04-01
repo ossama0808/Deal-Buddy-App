@@ -1,7 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import '../Dashboard.dart';
 import 'LoginPage.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -17,10 +20,28 @@ class _SplashScreenState extends State<SplashScreen> {
     super.initState();
   }
 
-  navigateAfterDuration() {
-      Future.delayed(Duration(seconds: 3), () {
-        Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => LoginPage()));
+  navigateAfterDuration() async{
+    // Delay for splash screen
+    await Future.delayed(Duration(seconds: 3));
+
+    // Check if a user is already signed in
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      await FirebaseFirestore.instance.collection('Accounts').doc(user.uid).get().then((userData) async {
+        if (userData.exists==true){
+          if (userData.data()?['IsActive'] == false) {
+            Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => LoginPage()));
+          } else {
+            Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => Dashboard(userData: userData)));
+          }
+        }else{
+          Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => LoginPage()));
+        }
       });
+    } else {
+      // If no user is signed in, navigate to the login page
+      Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => LoginPage()));
+    }
   }
 
   @override

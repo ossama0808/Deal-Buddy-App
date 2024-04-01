@@ -3,17 +3,18 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../Dashboard.dart';
 import 'LoginPage.dart';
 
 class SignUpPage extends StatefulWidget {
   @override
   State<SignUpPage> createState() => _SignUpPageState();
 }
-
 class _SignUpPageState extends State<SignUpPage> {
   TextEditingController firstLastNameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
+  String? accountType;
 
   @override
   void initState() {
@@ -50,6 +51,36 @@ class _SignUpPageState extends State<SignUpPage> {
             ),
             SizedBox(
               height: 30,
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Radio(
+                    value: 'Shopper',
+                    groupValue: accountType,
+                    onChanged: (value) {
+                      setState(() {
+                        accountType = value;
+                      });
+                    },
+                  ),
+                  Text('Shopper'),
+                  SizedBox(width: 15,),
+                  Radio(
+                    value: 'Buyer',
+                    groupValue: accountType,
+                    onChanged: (value) {
+                      setState(() {
+                        accountType = value;
+                      });
+                    },
+                  ),
+                  Text('Buyer'),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -167,7 +198,14 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   validateEntities() {
-    if (firstLastNameController.text.length < 6 ) {
+    // Check account type value before SignUp
+    if (accountType==null){
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        duration: Duration(seconds: 3),
+        backgroundColor: Colors.red,
+        content: Center(child: Text('Account type is mandatory', style: GoogleFonts.elMessiri(color: Colors.white, fontSize: 19))),
+      ));
+    } else if (firstLastNameController.text.length < 6 ) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         duration: Duration(seconds: 3),
         backgroundColor: Colors.red,
@@ -227,10 +265,11 @@ class _SignUpPageState extends State<SignUpPage> {
               'UserName': firstLastNameController.text,
               'UserEmail': emailController.text,
               'CreatedAt': DateTime.now(),
-              'IsActive': true
+              'IsActive': true,
+              'AccountType':accountType
               }).then((metaData) async {
             await FirebaseFirestore.instance.collection('Accounts').doc(user.uid).get().then((userData) {
-              // Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => Dashboard(userData: userData,)));
+              Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => Dashboard(userData: userData)));
             });
           });
         } else {

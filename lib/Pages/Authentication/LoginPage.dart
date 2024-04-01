@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../Dashboard.dart';
 import 'SignUpPage.dart';
 
 
@@ -161,7 +162,7 @@ class _LoginPageState extends State<LoginPage> {
               ));
             } else {
               print('Account passed');
-              // Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => Dashboard(userData: userData)));
+              Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (BuildContext context) => Dashboard(userData: userData)));
             }
           });
         } else {
