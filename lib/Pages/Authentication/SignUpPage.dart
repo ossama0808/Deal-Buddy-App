@@ -70,7 +70,7 @@ class _SignUpPageState extends State<SignUpPage> {
                   Text('Shopper'),
                   SizedBox(width: 15,),
                   Radio(
-                    value: 'Buyer',
+                    value: 'Seller',
                     groupValue: accountType,
                     onChanged: (value) {
                       setState(() {
@@ -78,7 +78,7 @@ class _SignUpPageState extends State<SignUpPage> {
                       });
                     },
                   ),
-                  Text('Buyer'),
+                  Text('Seller'),
                 ],
               ),
             ),
