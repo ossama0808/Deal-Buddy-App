@@ -27,7 +27,7 @@ apply plugin: 'com.google.gms.google-services'
 
 android {
     namespace "com.example.deal_buddy_app"
-    compileSdkVersion 33
+    compileSdkVersion 34
     ndkVersion flutter.ndkVersion
 
     compileOptions {
