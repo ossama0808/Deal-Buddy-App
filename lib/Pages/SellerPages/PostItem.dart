@@ -8,8 +8,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 
 class PostItem extends StatefulWidget {
-  const PostItem({required this.userData});
+  const PostItem({required this.userData, this.updateItemDoc});
   final DocumentSnapshot<Map<String, dynamic>> userData;
+  final DocumentSnapshot<Map<String, dynamic>> ? updateItemDoc;
 
   @override
   State<PostItem> createState() => _PostItemState();
@@ -17,9 +18,22 @@ class PostItem extends StatefulWidget {
 
 class _PostItemState extends State<PostItem> {
   final TextEditingController _itemNameController = TextEditingController();
+  final TextEditingController _itemStoreURLController = TextEditingController();
   final TextEditingController _itemDescriptionController = TextEditingController();
   final TextEditingController _itemPriceController = TextEditingController();
   File? _itemImage;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.updateItemDoc != null) {
+      final data = widget.updateItemDoc!.data();
+      _itemNameController.text = data?['ItemName'] ?? '';
+      _itemDescriptionController.text = data?['ItemDescription'] ?? '';
+      _itemStoreURLController.text = data?['ItemStoreURL'] ?? '';
+      _itemPriceController.text = data?['ItemPrice'].toString() ?? '';
+    }
+  }
 
   Future<void> _getImageFromGallery() async {
     final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
@@ -54,9 +68,11 @@ class _PostItemState extends State<PostItem> {
   Future<void> _saveNewItem() async {
     final itemName = _itemNameController.text;
     final itemDescription = _itemDescriptionController.text;
+    final itemStoreURL = _itemStoreURLController.text;
     final itemPrice = double.tryParse(_itemPriceController.text) ?? 0.0;
+    final imageUrl;
 
-    if (itemName.isEmpty || itemDescription.isEmpty || itemPrice <= 0.0 || _itemImage == null) {
+    if (itemName.isEmpty || itemDescription.isEmpty || itemPrice <= 0.0 || itemStoreURL.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         duration: Duration(seconds: 3),
         backgroundColor: Colors.red,
@@ -65,24 +81,40 @@ class _PostItemState extends State<PostItem> {
       return;
     }
 
-    final imageUrl = await _uploadImageToStorage();
-    if (imageUrl == null) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        duration: Duration(seconds: 3),
-        backgroundColor: Colors.red,
-        content: Center(child: Text('Failed to upload image',style: GoogleFonts.elMessiri(color: Colors.white,fontSize: 19,))),
-      ));
-      return;
+    if (widget.updateItemDoc !=null){
+     imageUrl=widget.updateItemDoc!['ItemImageUrl'];
+    } else {
+      imageUrl = await _uploadImageToStorage();
+      if (imageUrl == null) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          duration: Duration(seconds: 3),
+          backgroundColor: Colors.red,
+          content: Center(child: Text('Failed to upload image',style: GoogleFonts.elMessiri(color: Colors.white,fontSize: 19,))),
+        ));
+        return;
+      }
     }
 
     try {
-      await FirebaseFirestore.instance.collection('Items').add({
-        'ItemName': itemName,
-        'ItemDescription': itemDescription,
-        'ItemPrice': itemPrice,
-        'ItemImageUrl': imageUrl,
-        'SellerUID':widget.userData.id,
-      });
+      if (widget.updateItemDoc != null) {
+        // Update existing item
+        await widget.updateItemDoc!.reference.update({
+          'ItemName': itemName,
+          'ItemDescription': itemDescription,
+          'ItemPrice': itemPrice,
+          'ItemStoreURL': itemStoreURL,
+        });
+      } else {
+        // Add new item
+        await FirebaseFirestore.instance.collection('Items').add({
+          'ItemName': itemName,
+          'ItemDescription': itemDescription,
+          'ItemPrice': itemPrice,
+          'ItemImageUrl': imageUrl,
+          'ItemStoreURL': itemStoreURL,
+          'SellerUID': widget.userData.id,
+        });
+      }
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         duration: Duration(seconds: 3),
         backgroundColor: Colors.green,
@@ -110,7 +142,7 @@ class _PostItemState extends State<PostItem> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Post New Item',
+                'Post/Update Item',
                 style: GoogleFonts.elMessiri(fontSize: 24, fontWeight: FontWeight.bold,color: Colors.white),
               ),
             ],
@@ -134,7 +166,17 @@ class _PostItemState extends State<PostItem> {
               padding: const EdgeInsets.all(8.0),
               child: GestureDetector(
                 onTap: _getImageFromGallery,
-                child: _itemImage != null ? Image.file(_itemImage!, height: 300, width: double.infinity, fit: BoxFit.contain) : Container(
+                child: widget.updateItemDoc != null && _itemImage == null ? Image.network(
+                  widget.updateItemDoc!['ItemImageUrl'],
+                  height: 300,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                ) : _itemImage != null ? Image.file(
+                  _itemImage!,
+                  height: 300,
+                  width: double.infinity,
+                  fit: BoxFit.contain,
+                ) : Container(
                   height: 300,
                   width: double.infinity,
                   decoration: BoxDecoration(
@@ -188,6 +230,30 @@ class _PostItemState extends State<PostItem> {
                       fontSize: 17,
                     ),
                     hintText: 'Item Description',
+                  ),
+                  cursorColor: Color(0xff55b3bb),
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: TextFormField(
+                  controller: _itemStoreURLController,
+                  keyboardType: TextInputType.url,
+                  decoration: InputDecoration(
+                    fillColor: Color(0xff55b3bb),
+                    focusColor: Color(0xff55b3bb),
+                    border: OutlineInputBorder(borderSide: BorderSide(color: Color(0xff55b3bb), style: BorderStyle.solid), borderRadius: BorderRadius.circular(14)),
+                    labelStyle: GoogleFonts.elMessiri(
+                      color: Color(0xff55b3bb),
+                      fontSize: 17,
+                    ),
+                    hintText: 'Item Store URL',
                   ),
                   cursorColor: Color(0xff55b3bb),
                 ),

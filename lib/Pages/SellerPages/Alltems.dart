@@ -56,34 +56,53 @@ class _AllItemsState extends State<AllItems> {
               itemBuilder: (BuildContext context, int index) {
                 var item = snapshot.data!.docs[index];
                 // Customize card design here
-                return Card(
-                  elevation: 3,
-                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  child: ListTile(
-                    leading: Container(
-                      width: 50,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.rectangle,
-                        image: DecorationImage(
-                          image: NetworkImage(item['ItemImageUrl']), // Assuming 'ItemImageURL' is the field containing the image URL
-                          fit: BoxFit.fitHeight,
+                return GestureDetector(
+                  onTap: (){
+                    Navigator.of(context).push(CupertinoPageRoute(
+                      builder: (BuildContext context) => PostItem(
+                        userData: widget.userData,
+                        updateItemDoc: snapshot.data!.docs[index] as DocumentSnapshot<Map<String, dynamic>>?,
+                      ),
+                    ));
+                  },
+                  onLongPress: (){
+                    final deleteDoc=snapshot.data!.docs[index] as DocumentSnapshot<Map<String, dynamic>>?;
+                    deleteDoc?.reference.delete();
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      duration: Duration(seconds: 3),
+                      backgroundColor: Colors.green,
+                      content: Center(child: Text('Item deleted successfully',style: GoogleFonts.elMessiri(color: Colors.white,fontSize: 19,))),
+                    ));
+                  },
+                  child: Card(
+                    elevation: 3,
+                    margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    child: ListTile(
+                      leading: Container(
+                        width: 50,
+                        height: 100,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.rectangle,
+                          image: DecorationImage(
+                            image: NetworkImage(item['ItemImageUrl']), // Assuming 'ItemImageURL' is the field containing the image URL
+                            fit: BoxFit.fitHeight,
+                          ),
                         ),
                       ),
-                    ),
-                    title: Text(item['ItemName'],
-                      style: GoogleFonts.elMessiri(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff08666E),
+                      title: Text(item['ItemName'],
+                        style: GoogleFonts.elMessiri(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff08666E),
+                        ),
                       ),
-                    ),
-                    subtitle: Text(
-                        'Price: ${item['ItemPrice']} SAR',
-                      style: GoogleFonts.elMessiri(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xff55b3bb),
+                      subtitle: Text(
+                          'Price: ${item['ItemPrice']} SAR',
+                        style: GoogleFonts.elMessiri(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xff55b3bb),
+                        ),
                       ),
                     ),
                   ),
