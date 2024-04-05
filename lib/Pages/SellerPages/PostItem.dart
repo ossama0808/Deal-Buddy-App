@@ -29,14 +29,13 @@ class _PostItemState extends State<PostItem> {
       });
     }
   }
+
   Future<String?> _uploadImageToStorage() async {
     if (_itemImage == null) return null;
 
     try {
       // Get the file name and extension from the picked file's path
       String fileName = _itemImage!.path.split('/').last;
-      String fileExtension = fileName.split('.').last;
-
       // Create a reference to the Firebase Storage path with the same file name and extension
       final storageRef = FirebaseStorage.instance.ref().child('item_images/$fileName');
 
