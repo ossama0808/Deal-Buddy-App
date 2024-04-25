@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_note_app/Pages/AllOrdersPage.dart';
 import 'package:smart_note_app/Pages/Authentication/ProfilePage.dart';
 import 'package:smart_note_app/Pages/SellerPages/Alltems.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -103,6 +104,12 @@ class _DashboardState extends State<Dashboard> {
                 Navigator.of(context).push(CupertinoPageRoute(builder: (BuildContext context) => AllItems(userData: widget.userData)));
               },
             ),
+          ),
+          IconButton(
+            icon: Icon(Icons.all_inbox_rounded,color: Colors.white,),
+            onPressed: () {
+              Navigator.of(context).push(CupertinoPageRoute(builder: (BuildContext context) => AllOrders(userData: widget.userData)));
+            },
           ),
           IconButton(
             icon: Icon(Icons.account_circle,color: Colors.white,),
